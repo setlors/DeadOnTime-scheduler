@@ -2,7 +2,6 @@ package core;
 
 import model.TimeBlock;
 import model.UserSettings;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +16,7 @@ public class FreeSlotCalculator {
             LocalDateTime workdayStart = currDay.atTime(userSettings.workStart());
             LocalDateTime workdayEnd = currDay.atTime(userSettings.workEnd());
 
-            List<TimeBlock> busyToday = new ArrayList<TimeBlock>();
+            List<TimeBlock> busyToday = new ArrayList<>();
             for(TimeBlock slot : userSettings.busySlots()){
                 if (slot.start().isBefore(workdayEnd) && slot.end().isAfter(workdayStart)) {
                     LocalDateTime newStart = slot.start().isAfter(workdayStart) ? slot.start() : workdayStart;
@@ -25,7 +24,7 @@ public class FreeSlotCalculator {
                     busyToday.add(new TimeBlock(newStart, newEnd));
                 }
             }
-            List<TimeBlock> sorted = new ArrayList<TimeBlock>(busyToday);
+            List<TimeBlock> sorted = new ArrayList<>(busyToday);
             sorted.sort(Comparator.comparing(TimeBlock::start));
 
             LocalDateTime pointer = workdayStart;
@@ -36,9 +35,9 @@ public class FreeSlotCalculator {
                 if(slot.end().isAfter(pointer)) {
                     pointer = slot.end();
                 }
-                if(slot.end().isBefore(workdayEnd)) {
-                    result.add(new TimeBlock(slot.end(), pointer));
-                }
+            }
+            if(pointer.isBefore(workdayEnd)) {
+                result.add(new TimeBlock(pointer, workdayEnd));
             }
         }
         return result;
