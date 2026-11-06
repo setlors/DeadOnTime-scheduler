@@ -20,7 +20,8 @@ public class Placer {
             boolean placed = false;
             for(int i = 0; i < trial.size(); i++) {
                 TimeBlock block = trial.get(i);
-                Duration length = block.length();
+                LocalDateTime usableEnd = block.end().isBefore(task.deadline()) ? block.end() : task.deadline();
+                Duration length = Duration.between(block.start(), usableEnd);
                 if(length.compareTo(task.estimate()) >= 0){
                     LocalDateTime blockEnd = block.start().plus(task.estimate());
                     TimeBlock block1 = new TimeBlock(block.start(), blockEnd);
@@ -37,8 +38,6 @@ public class Placer {
             else {
                 schedule.getUnscheduledTasks().add(task);
             }
-
-
         }
         return schedule;
     }
