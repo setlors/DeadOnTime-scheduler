@@ -16,6 +16,7 @@ public class Placer {
         List<TimeBlock> windows = new ArrayList<>(freeSlots);
         for (Task task : orderedTasks) {
             List<TimeBlock> trial = new ArrayList<>(windows);
+            List<ScheduledBlock> pieces = new ArrayList<>();
             boolean placed = false;
             for(int i = 0; i < trial.size(); i++) {
                 TimeBlock block = trial.get(i);
@@ -23,10 +24,18 @@ public class Placer {
                 if(length.compareTo(task.estimate()) >= 0){
                     LocalDateTime blockEnd = block.start().plus(task.estimate());
                     TimeBlock block1 = new TimeBlock(block.start(), blockEnd);
-                    ScheduledBlock scheduledBlock = new ScheduledBlock(task, block1);
+                    pieces.add(new ScheduledBlock(task, block1));
+                    trial.set(i, new TimeBlock(blockEnd, block.end()));
+                    placed = true;
+                    break;
                 }
-
             }
+            /*if(placed){
+                windows = trial;
+                schedule.getScheduledBlocks().addAll();
+            }
+            */
+
         }
         return schedule;
     }
