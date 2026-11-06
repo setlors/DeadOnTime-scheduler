@@ -30,11 +30,14 @@ public class Placer {
                     break;
                 }
             }
-            /*if(placed){
+            if(placed){
                 windows = trial;
-                schedule.getScheduledBlocks().addAll();
+                schedule.getScheduledBlocks().addAll(pieces);
             }
-            */
+            else {
+                schedule.getUnscheduledTasks().add(task);
+            }
+
 
         }
         return schedule;
