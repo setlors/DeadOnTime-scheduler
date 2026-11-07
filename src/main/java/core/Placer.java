@@ -42,14 +42,14 @@ public class Placer {
             }
             else {
             for(int i = 0; i < trial.size(); i++) {
-                TimeBlock block = trial.get(i);
-                LocalDateTime usableEnd = block.end().isBefore(task.deadline()) ? block.end() : task.deadline();
-                Duration length = Duration.between(block.start(), usableEnd);
+                TimeBlock window = trial.get(i);
+                LocalDateTime usableEnd = window.end().isBefore(task.deadline()) ? window.end() : task.deadline();
+                Duration length = Duration.between(window.start(), usableEnd);
                 if (length.compareTo(task.estimate()) >= 0) {
-                    LocalDateTime blockEnd = block.start().plus(task.estimate());
-                    TimeBlock block1 = new TimeBlock(block.start(), blockEnd);
-                    pieces.add(new ScheduledBlock(task, block1));
-                    trial.set(i, new TimeBlock(blockEnd, block.end()));
+                    LocalDateTime windowEnd = window.start().plus(task.estimate());
+                    TimeBlock window1 = new TimeBlock(window.start(), windowEnd);
+                    pieces.add(new ScheduledBlock(task, window1));
+                    trial.set(i, new TimeBlock(windowEnd, window.end()));
                     placed = true;
                     break;
                 }
