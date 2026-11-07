@@ -11,6 +11,13 @@ import java.util.List;
 import java.util.Locale;
 import model.TimeBlock;
 import java.time.LocalTime;
+import core.FreeSlotCalculator;
+import core.Placer;
+import model.Schedule;
+import model.ScheduledBlock;
+import model.UserSettings;
+import java.time.LocalDate;
+import java.util.Comparator;
 
 // --- will be changed later ---
 public class CliApp {
@@ -24,6 +31,14 @@ public class CliApp {
     private LocalTime workEnd = LocalTime.of(18, 0);
     private final List<Task> tasks = new ArrayList<>();
     private int nextId = 1;
+    private static final DateTimeFormatter DAY_SHOW = DateTimeFormatter.ofPattern("EEEE dd.MM.yyyy", Locale.ENGLISH);
+    private static final DateTimeFormatter TIME_SHOW = DateTimeFormatter.ofPattern("HH:mm");
+    private final FreeSlotCalculator calculator = new FreeSlotCalculator();
+    private final Placer placer = new Placer();
+
+    private void printHelp() {
+        System.out.println("Commands: add, list, remove, busy, hours, generate, help, quit");
+    }
 
     public void run() {
         System.out.println("=== DeadOnTime ===");
@@ -43,6 +58,7 @@ public class CliApp {
                 case "remove" -> removeTask();
                 case "busy" -> addBusySlot();
                 case "hours" -> setWorkingHours();
+                case "generate" -> generate();
                 default -> System.out.println("Unknown command. Type 'help'.");
             }
         }
@@ -67,7 +83,7 @@ public class CliApp {
             System.out.println("No tasks yet. Type 'add'.");
             return;
         }
-        System.out.printf("%-3s %-20s %-9s %-14s %-5s %s%n", "ID", "Title", "Estimate", "Deadline", "Prio", "Type");
+        System.out.printf("%-3s %-20s %-9s %-14s %-5s %s%n", "ID", "Title", "Estimate", "Deadline", "Priority", "Type");
         for (Task t : tasks) {
             System.out.printf("%-3s %-20s %-9s %-14s %-5d %s%n",
                     t.id(),
@@ -184,7 +200,61 @@ public class CliApp {
             }
         }
     }
-    private void printHelp() {
-        System.out.println("Commands: add, list, remove, busy, hours, help, quit");
+    private void generate() {
+        if (tasks.isEmpty()) {
+            System.out.println("No tasks yet. Type 'add'.");
+            return;
+        }
+        LocalDate from = askDate("Start date (yyyy-MM-dd):");
+        int days = askInt("Number of days (1-14):", 1, 14);
+
+        List<TimeBlock> free = calculator.calculate(currentSettings(), from, days);
+        Schedule schedule = placer.place(tasks, free);
+        printSchedule(schedule);
     }
+
+    private UserSettings currentSettings() {
+        return new UserSettings(workStart, workEnd,
+                Duration.ofHours(6), Duration.ofMinutes(90), Duration.ofMinutes(15),
+                busySlots);
+    }
+
+    private void printSchedule(Schedule schedule) {
+        List<ScheduledBlock> blocks = new ArrayList<>(schedule.getScheduledBlocks());
+        blocks.sort(Comparator.comparing(b -> b.block().start()));
+
+        LocalDate lastDay = null;
+        for (ScheduledBlock b : blocks) {
+            LocalDate day = b.block().start().toLocalDate();
+            if (!day.equals(lastDay)) {
+                System.out.println();
+                System.out.println(DAY_SHOW.format(day));
+                lastDay = day;
+            }
+            System.out.printf("  %s-%s  %s%n",
+                    TIME_SHOW.format(b.block().start()),
+                    TIME_SHOW.format(b.block().end()),
+                    b.task().title());
+        }
+
+        for (Task t : schedule.getUnscheduledTasks()) {
+            System.out.println();
+            System.out.println("NOT SCHEDULED: " + t.title() + " (deadline " + DATE_TIME_SHOW.format(t.deadline()) + ")");
+        }
+
+        int unscheduled = schedule.getUnscheduledTasks().size();
+        System.out.println();
+        System.out.println("Placed: " + (tasks.size() - unscheduled) + " of " + tasks.size() + " tasks");
+    }
+    private LocalDate askDate(String question) {
+        while (true) {
+            System.out.print(question + " ");
+            try {
+                return LocalDate.parse(in.nextLine().trim());
+            } catch (DateTimeParseException e) {
+                System.out.println("Use the format yyyy-MM-dd, for example 2026-11-09.");
+            }
+        }
+    }
+
 }
