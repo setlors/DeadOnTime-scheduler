@@ -37,7 +37,7 @@ public class CliApp {
     private final Placer placer = new Placer();
 
     private void printHelp() {
-        System.out.println("Commands: add, list, remove, busy, hours, generate, help, quit");
+        System.out.println("Commands: add, list, remove, busy, hours, generate, demo, help, quit");
     }
 
     public void run() {
@@ -59,6 +59,7 @@ public class CliApp {
                 case "busy" -> addBusySlot();
                 case "hours" -> setWorkingHours();
                 case "generate" -> generate();
+                case "demo" -> loadDemo();
                 default -> System.out.println("Unknown command. Type 'help'.");
             }
         }
@@ -256,5 +257,32 @@ public class CliApp {
             }
         }
     }
+    private void loadDemo() {
+        tasks.clear();
+        busySlots.clear();
+        nextId = 1;
+        workStart = LocalTime.of(9, 0);
+        workEnd = LocalTime.of(18, 0);
 
+        LocalDate monday = LocalDate.of(2026, 11, 9);    // fixed date, so the demo never changes
+
+        addDemoTask("Email backlog", 60,  monday.atTime(12, 0),              1, false, 0);
+        addDemoTask("Essay",         120, monday.plusDays(1).atTime(12, 0),  5, false, 0);
+        addDemoTask("Report",        180, monday.atTime(18, 0),              3, false, 0);
+        addDemoTask("Coursework",    300, monday.plusDays(4).atTime(23, 59), 5, true, 60);
+        addDemoTask("Read papers",   240, monday.plusDays(3).atTime(18, 0),  2, true, 30);
+
+        for (int i = 0; i < 5; i++) {                    // lunch on every weekday
+            LocalDate day = monday.plusDays(i);
+            busySlots.add(new TimeBlock(day.atTime(12, 0), day.atTime(13, 0)));
+        }
+
+        System.out.println("Demo loaded. Try 'list', then 'generate' from 2026-11-09 for 5 days.");
+    }
+
+    private void addDemoTask(String title, int minutes, LocalDateTime deadline,
+                             int priority, boolean splittable, int minChunkMinutes) {
+        tasks.add(new Task(String.valueOf(nextId++), title, Duration.ofMinutes(minutes),
+                deadline, priority, splittable, Duration.ofMinutes(minChunkMinutes)));
+    }
 }
