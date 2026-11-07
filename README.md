@@ -22,17 +22,17 @@ It ships with two scheduling engines, a fast **greedy** algorithm and an evolvin
 
 ## Features
 
-| | Feature | Description |
-|---|---|---|
-| 📝 | **Smart task input** | Add tasks with a time estimate, deadline, and priority (1 to 5) |
+| | Feature | Description                                                                                   |
+|---|---|-----------------------------------------------------------------------------------------------|
+| 📝 | **Smart task input** | Add tasks with a time estimate, deadline, and priority (1 to 3)                               |
 | 🗓️ | **Flexible day setup** | Define working hours, daily workload limit, breaks, and busy slots (classes, meetings, lunch) |
-| ✂️ | **Splittable tasks** | Big tasks can be broken into smaller chunks automatically |
-| ⚡ | **Greedy scheduler** | Fast and predictable |
-| 🧬 | **Genetic scheduler** | Slower, but searches for a better order of tasks |
-| 📊 | **Schedule scoring** | Every schedule gets a number, so algorithms can be compared fairly |
-| 🚫 | **Honest reporting** | Tasks that cannot fit before their deadline are listed, not hidden |
-| 💾 | **JSON storage** | Tasks and settings are saved to JSON |
-| 📤 | **Export** | Save the final schedule to `.ics` (Google Calendar, Apple Calendar) or Markdown |
+| ✂️ | **Splittable tasks** | Big tasks can be broken into smaller chunks automatically                                     |
+| ⚡ | **Greedy scheduler** | Fast and predictable                                                                          |
+| 🧬 | **Genetic scheduler** | Slower, but searches for a better order of tasks                                              |
+| 📊 | **Schedule scoring** | Every schedule gets a number, so algorithms can be compared fairly                            |
+| 🚫 | **Honest reporting** | Tasks that cannot fit before their deadline are listed, not hidden                            |
+| 💾 | **JSON storage** | Tasks and settings are saved to JSON                                                          |
+| 📤 | **Export** | Save the final schedule to `.ics` (Google Calendar, Apple Calendar) or Markdown               |
 
 ---
 
