@@ -9,6 +9,8 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import model.TimeBlock;
+import java.time.LocalTime;
 
 // --- will be changed later ---
 public class CliApp {
@@ -17,7 +19,9 @@ public class CliApp {
 
     private static final DateTimeFormatter DATE_TIME_INPUT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static final DateTimeFormatter DATE_TIME_SHOW = DateTimeFormatter.ofPattern("EEE dd.MM HH:mm", Locale.ENGLISH);
-
+    private final List<TimeBlock> busySlots = new ArrayList<>();
+    private LocalTime workStart = LocalTime.of(9, 0);
+    private LocalTime workEnd = LocalTime.of(18, 0);
     private final List<Task> tasks = new ArrayList<>();
     private int nextId = 1;
 
@@ -36,6 +40,9 @@ public class CliApp {
                 case "" -> { }
                 case "add" -> addTask();
                 case "list" -> listTasks();
+                case "remove" -> removeTask();
+                case "busy" -> addBusySlot();
+                case "hours" -> setWorkingHours();
                 default -> System.out.println("Unknown command. Type 'help'.");
             }
         }
@@ -46,7 +53,7 @@ public class CliApp {
         String title = askText("Title:");
         Duration estimate = askMinutes("Estimate in minutes:");
         LocalDateTime deadline = askDateTime("Deadline (yyyy-MM-dd HH:mm):");
-        int priority = askInt("Priority (1-5):", 1, 5);
+        int priority = askInt("Priority (1 = high, 2 = medium, 3 = low):", 1, 3);
         boolean splittable = askYesNo("Can it be split into parts? (y/n):");
         Duration minChunk = splittable ? askMinutes("Smallest allowed part in minutes:") : Duration.ZERO;
 
@@ -138,7 +145,46 @@ public class CliApp {
         }
     }
 
+    private void removeTask() {
+        String id = askText("Id to remove:");
+        boolean removed = tasks.removeIf(t -> t.id().equals(id));
+        System.out.println(removed ? "Removed." : "No task with id " + id);
+    }
+
+    private void addBusySlot() {
+        LocalDateTime start = askDateTime("Busy from (yyyy-MM-dd HH:mm):");
+        LocalDateTime end = askDateTime("Busy until (yyyy-MM-dd HH:mm):");
+        try {
+            busySlots.add(new TimeBlock(start, end));
+            System.out.println("Busy slot added.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("The end must not be before the start.");
+        }
+    }
+
+    private void setWorkingHours() {
+        LocalTime start = askTime("Work starts (HH:mm):");
+        LocalTime end = askTime("Work ends (HH:mm):");
+        if (!end.isAfter(start)) {
+            System.out.println("Work must end after it starts.");
+            return;
+        }
+        workStart = start;
+        workEnd = end;
+        System.out.println("Working hours: " + workStart + "-" + workEnd);
+    }
+
+    private LocalTime askTime(String question) {
+        while (true) {
+            System.out.print(question + " ");
+            try {
+                return LocalTime.parse(in.nextLine().trim());
+            } catch (DateTimeParseException e) {
+                System.out.println("Use the format HH:mm, for example 09:00.");
+            }
+        }
+    }
     private void printHelp() {
-        System.out.println("Commands: add, list, help, quit");
+        System.out.println("Commands: add, list, remove, busy, hours, help, quit");
     }
 }
