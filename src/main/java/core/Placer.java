@@ -28,6 +28,10 @@ public class Placer {
                         continue;
                     }
                     Duration chunk = room.compareTo(remaining) < 0 ? room : remaining;
+                    boolean allowed = chunk.compareTo(task.minChunk()) >= 0 || chunk.compareTo(remaining) == 0;
+                    if (!allowed) {
+                        continue;
+                    }
                     LocalDateTime chunkEnd = window.start().plus(chunk);
                     pieces.add(new ScheduledBlock(task, new TimeBlock(window.start(), chunkEnd)));
                     trial.set(i, new TimeBlock(chunkEnd, window.end()));
