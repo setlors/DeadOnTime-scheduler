@@ -9,5 +9,6 @@ public record Task(
         Duration estimate,
         LocalDateTime deadline,
         int priority,
-        boolean splittable
+        boolean splittable,
+        Duration minChunk
 ) {}
