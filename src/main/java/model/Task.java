@@ -11,4 +11,7 @@ public record Task(
         int priority,
         boolean splittable,
         Duration minChunk
-) {}
+) {
+    // 1-3, 1 -> more important
+    public int weight() { return 4 - priority; }
+}
